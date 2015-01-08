@@ -9,3 +9,9 @@ dist
 .pydevproject
 .settings
 docs/_*
+
+# ignore virtual environment
+.venv
+
+# ignore pycharm files
+.idea
