@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-waffle-session',
-    version='0.1.7',
+    version='0.1.8',
     description='A feature flipper for Django.',
     long_description=open('README.rst').read(),
     author='Francis Mwangi',
