@@ -30,17 +30,18 @@ def set_flag(request, flag_name, active=True, session_only=False):
     request.waffles[flag_name] = [active, session_only]
 
 
-def flag_is_active(request, flag_name, session_key="feature"):
-    from .models import cache_flag, Flag
+def flag_is_active(request, flag_name, custom_user='phone_number'):
+    """
+    custom_group phone number is an alternate form of validation apart from the user and Group
+            it finds the custom_user from the request then check if the phone_number is in the VerifiedUser
+            and its feature is the flag_name
+    :param request:
+    :param flag_name:
+    :param custom_user:
+    :return:
+    """
+    from .models import cache_flag, Flag, VerifiedUser
     from .compat import cache
-
-    if hasattr(request, 'session'):
-        try:
-            flag = Flag.objects.get(name=flag_name)
-            if request.session.get(session_key) == flag.name:
-                return True
-        except Flag.DoesNotExist:
-            pass
 
     flag = cache.get(keyfmt(settings.FLAG_CACHE_KEY, flag_name))
     if flag is None:
@@ -59,6 +60,12 @@ def flag_is_active(request, flag_name, session_key="feature"):
     elif flag.everyone is False:
         return False
 
+    if hasattr(request, custom_user):
+        user = getattr(request, custom_user)
+
+        if VerifiedUser.objects.filter(feature_id=flag.id).filter(phone_number=user).exists():
+            return True
+
     if flag.testing:  # Testing mode is on.
         tc = settings.TEST_COOKIE_NAME % flag_name
         if tc in request.GET:
@@ -72,7 +79,6 @@ def flag_is_active(request, flag_name, session_key="feature"):
 
     if hasattr(request, 'user'):
         user = request.user
-
         if flag.authenticated and user.is_authenticated():
             return True
 
