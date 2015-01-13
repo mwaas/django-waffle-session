@@ -7,13 +7,8 @@ from waffle import flag_is_active
 from waffle.decorators import waffle_flag, waffle_switch
 
 
-def flag_in_view(request):
-    if flag_is_active(request, 'myflag'):
-        return HttpResponse('on')
-    return HttpResponse('off')
-
-def flag_in_session(request):
-    if flag_is_active(request, 'version1'):
+def flag_in_view(request, flag_name='myflag'):
+    if flag_is_active(request, flag_name):
         return HttpResponse('on')
     return HttpResponse('off')
 
