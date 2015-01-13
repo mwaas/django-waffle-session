@@ -10,7 +10,7 @@ import mock
 from test_app import views
 import waffle
 from waffle.middleware import WaffleMiddleware
-from waffle.models import Flag, Sample, Switch
+from waffle.models import Flag, Sample, Switch, VerifiedUser
 from waffle.tests.base import TestCase
 from waffle import settings
 
@@ -23,8 +23,8 @@ def get(**kw):
     return request
 
 
-def process_request(request, view):
-    response = view(request)
+def process_request(request, view, flag_name='myflag'):
+    response = view(request, flag_name)
     return WaffleMiddleware().process_response(request, response)
 
 
@@ -288,39 +288,46 @@ class WaffleTests(TestCase):
         response = self.client.get('/flag_in_view?dwft_myflag=1')
         self.assertEqual(b'on', response.content)
 
-    def test_session(self):
-        """
-        Test the flag is on if session key and session value are in request session
-        """
+    def test_feature_flipping_in_phone_group(self):
 
-        s = SessionStore()
-        s['feature'] = 'version1'
-        # create a flag with session (key and value)
-        Flag.objects.create(name='version1', sessions=True)
+        # test flag with no phone_number in the phone group
+        flag, create = Flag.objects.get_or_create(name='feature1')
+        phone_number = '0702729654'
+        VerifiedUser.objects.filter(feature=flag).filter(phone_number=phone_number).delete()
+
         request = RequestFactory().get('/foo')
+        request.phone_number = phone_number
+        response = process_request(request, views.flag_in_view, 'feature1')
+        self.assertEqual(b'off', response.content)
 
-        request.session = s
-        response = process_request(request, views.flag_in_session)
-        # a request with session that is in Flag should be active
+        # test flag is  active for everyone, if everyone_flag is true in flag
+        flag.everyone = True
+        flag.save()
+
+        response = process_request(request, views.flag_in_view, 'feature1')
         self.assertEqual(b'on', response.content)
 
-        # request with wrong value the flag should be off
-        request.session['feature'] = 'version0'
-        response = process_request(request, views.flag_in_session)
-        self.assertEqual(b'off', response.content)
-
-        # request with no session data
-        del request.session['feature']
-        response = process_request(request, views.flag_in_session)
-        self.assertEqual(b'off', response.content)
-
-        request = RequestFactory().get('/foo')
-        request.session = s
-        flag = Flag.objects.get(name='version1')
-        flag.sessions = True
+        flag.everyone = None
         flag.save()
-        response = process_request(request, views.flag_in_session)
+
+
+        # test flag is active if phone_number is Flag - PhoneGroup
+        VerifiedUser.objects.create(feature=Flag.objects.get(name='feature1'),
+                                    phone_number=phone_number)
+
+        response = process_request(request, views.flag_in_view, 'feature1')
+        self.assertEqual(b'on', response.content)
+
+
+        verified_phone_number = VerifiedUser.objects.get(phone_number=phone_number)
+
+        flag, create = Flag.objects.get_or_create(name='Not_my_flag')
+        verified_phone_number.feature = flag
+        verified_phone_number.save()
+
+        response = process_request(request, views.flag_in_view)
         self.assertEqual(b'off', response.content)
+
 
 
 class SwitchTests(TestCase):
