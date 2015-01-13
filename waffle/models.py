@@ -61,6 +61,11 @@ class Flag(models.Model):
         super(Flag, self).save(*args, **kwargs)
 
 
+class VerifiedUser(models.Model):
+    feature = models.ForeignKey(Flag)
+    phone_number = models.CharField(max_length=255)
+
+
 class Switch(models.Model):
     """A feature switch.
 
