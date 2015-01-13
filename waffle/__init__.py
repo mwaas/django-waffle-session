@@ -86,17 +86,17 @@ def flag_is_active(request, flag_name, session_key="feature"):
         if flag_users is None:
             flag_users = flag.users.all()
             cache_flag(instance=flag)
-        if user in flag_users:
-            return True
+            if user in flag_users:
+                return True
 
         flag_groups = cache.get(keyfmt(settings.FLAG_GROUPS_CACHE_KEY, flag.name))
         if flag_groups is None:
             flag_groups = flag.groups.all()
             cache_flag(instance=flag)
-        user_groups = user.groups.all()
-        for group in flag_groups:
-            if group in user_groups:
-                return True
+            user_groups = user.groups.all()
+            for group in flag_groups:
+                if group in user_groups:
+                    return True
 
     if flag.languages:
         languages = flag.languages.split(',')
