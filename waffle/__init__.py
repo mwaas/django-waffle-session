@@ -43,7 +43,9 @@ def flag_is_active(request, flag_name, custom_user='phone_number'):
     from .models import cache_flag, Flag, VerifiedUser
     from .compat import cache
 
-    flag = cache.get(keyfmt(settings.FLAG_CACHE_KEY, flag_name))
+    # review:
+    #flag = cache.get(keyfmt(settings.FLAG_CACHE_KEY, flag_name))
+    flag = None
     if flag is None:
         try:
             flag = Flag.objects.get(name=flag_name)
