@@ -1,6 +1,7 @@
 from decimal import Decimal
 import random
 import hashlib
+import re
 
 
 from . import settings
@@ -30,7 +31,7 @@ def set_flag(request, flag_name, active=True, session_only=False):
     request.waffles[flag_name] = [active, session_only]
 
 
-def flag_is_active(request, flag_name, custom_user='phone_number'):
+def flag_is_active(request, flag_name, custom_user='phone_number', regex=False):
     """
     custom_group phone number is an alternate form of validation apart from the user and Group
             it finds the custom_user from the request then check if the phone_number is in the VerifiedUser
@@ -66,7 +67,18 @@ def flag_is_active(request, flag_name, custom_user='phone_number'):
         user = getattr(request, custom_user)
 
         if VerifiedUser.objects.filter(feature_id=flag.id).filter(phone_number=user).exists():
-            return True
+            if not regex:
+                return True
+
+            for beta_user in VerifiedUser.objects.filter(feature_id=flag.id).filter(phone_number=user):
+                regex = beta_user.phone_number
+                try:
+                    if not re.search(regex, user):
+                        return True
+                except:
+                    return False
+
+
 
     if flag.testing:  # Testing mode is on.
         tc = settings.TEST_COOKIE_NAME % flag_name
