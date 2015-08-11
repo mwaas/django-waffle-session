@@ -76,7 +76,8 @@ def flag_is_active(request, flag_name, custom_user='phone_number', regex=False):
                     if not re.search(regex, user):
                         return True
                 except:
-                    return False
+                    pass
+            return False
 
 
 
