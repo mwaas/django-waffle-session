@@ -73,7 +73,8 @@ def flag_is_active(request, flag_name, custom_user='phone_number', regex=False):
             for beta_user in VerifiedUser.objects.filter(feature_id=flag.id):
                 regex = beta_user.phone_number
                 try:
-                    if not re.search(regex, user):
+                    match = re.search(regex, user)
+                    if match is not None:
                         return True
                 except:
                     pass
