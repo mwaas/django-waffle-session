@@ -66,10 +66,7 @@ def flag_is_active(request, flag_name, custom_user='phone_number', regex=False):
     if hasattr(request, custom_user):
         user = getattr(request, custom_user)
 
-        if VerifiedUser.objects.filter(feature_id=flag.id).filter(phone_number=user).exists():
-            if not regex:
-                return True
-
+        if regex:
             for beta_user in VerifiedUser.objects.filter(feature_id=flag.id):
                 regex = beta_user.phone_number
                 try:
@@ -79,6 +76,10 @@ def flag_is_active(request, flag_name, custom_user='phone_number', regex=False):
                 except:
                     pass
             return False
+
+        if VerifiedUser.objects.filter(feature_id=flag.id).filter(phone_number=user).exists():
+            if not regex:
+                return True
 
 
 
