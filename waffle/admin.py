@@ -1,6 +1,8 @@
 from django.contrib import admin
 
 from waffle.models import Flag, Sample, Switch, VerifiedUser
+from import_export.admin import ImportExportModelAdmin
+from resources import VerifiedUserResource
 
 
 def enable_for_all(ma, request, qs):
@@ -28,11 +30,14 @@ class FlagAdmin(admin.ModelAdmin):
     raw_id_fields = ('users', 'groups')
     ordering = ('-id',)
 
-class VerifiedUserAdmin(admin.ModelAdmin):
+class VerifiedUserAdmin(ImportExportModelAdmin):
     list_display = ('phone_number', 'feature')
     list_filter = ('feature', )
     search_fields = ('phone_number', )
+    resource_class = VerifiedUserResource
 
+    def feature(self, instance):
+        return instance.feature.name
 
 
 def enable_switches(ma, request, qs):
