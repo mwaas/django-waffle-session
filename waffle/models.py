@@ -135,6 +135,7 @@ def uncache_flag(**kwargs):
     }
     cache.set_many(data, 5)
 
+
 post_save.connect(uncache_flag, sender=Flag, dispatch_uid='save_flag')
 post_delete.connect(uncache_flag, sender=Flag, dispatch_uid='delete_flag')
 m2m_changed.connect(uncache_flag, sender=Flag.users.through,
@@ -153,6 +154,7 @@ def uncache_sample(**kwargs):
     cache.set(keyfmt(settings.SAMPLE_CACHE_KEY, sample.name), None, 5)
     cache.set(keyfmt(settings.SAMPLES_ALL_CACHE_KEY), None, 5)
 
+
 post_save.connect(uncache_sample, sender=Sample, dispatch_uid='save_sample')
 post_delete.connect(uncache_sample, sender=Sample,
                     dispatch_uid='delete_sample')
@@ -168,6 +170,23 @@ def uncache_switch(**kwargs):
     cache.set(keyfmt(settings.SWITCH_CACHE_KEY, switch.name), None, 5)
     cache.set(keyfmt(settings.SWITCHES_ALL_CACHE_KEY), None, 5)
 
+
 post_delete.connect(uncache_switch, sender=Switch,
                     dispatch_uid='delete_switch')
 post_save.connect(uncache_switch, sender=Switch, dispatch_uid='save_switch')
+
+
+def cache_verified_user(**kwargs):
+    verified_user = kwargs.get('instance')
+    cache.add(keyfmt(settings.VERIFIED_USER_CACHE_KEY, verified_user.phone_number), verified_user)
+
+
+def uncache_verified_user(**kwargs):
+    verified_user = kwargs.get('instance')
+    cache.delete(keyfmt(settings.VERIFIED_USER_CACHE_KEY, verified_user.name))
+
+
+post_delete.connect(uncache_verified_user, sender=VerifiedUser,
+                    dispatch_uid='delete_verified_user')
+post_save.connect(uncache_verified_user, sender=VerifiedUser,
+                  dispatch_uid='save_verified_user')
