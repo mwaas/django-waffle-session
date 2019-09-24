@@ -183,7 +183,7 @@ def cache_verified_user(**kwargs):
 
 def uncache_verified_user(**kwargs):
     verified_user = kwargs.get('instance')
-    cache.delete(keyfmt(settings.VERIFIED_USER_CACHE_KEY, verified_user.name))
+    cache.delete(keyfmt(settings.VERIFIED_USER_CACHE_KEY, verified_user.phone_number))
 
 
 post_delete.connect(uncache_verified_user, sender=VerifiedUser,
