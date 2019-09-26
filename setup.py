@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='django-waffle-session',
-    version='0.2.4',
+    version='0.2.6',
     description='A feature flipper for Django.',
     long_description=open('README.rst').read(),
     author='Francis Mwangi',
     author_email='francismwangi152@gmail.com',
-    url='https://github.com/africanfinancebusiness/django-waffle-session',
+    url='https://github.com/jumo/django-waffle-session',
     license='BSD',
     packages=find_packages(exclude=['test_app', 'test_settings']),
     include_package_data=True,

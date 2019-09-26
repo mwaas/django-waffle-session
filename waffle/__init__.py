@@ -43,12 +43,11 @@ def flag_is_active(request, flag_name, custom_user='phone_number', msisdn=None, 
     :param msisdn
     :return:
     """
-    from .models import cache_flag, Flag, VerifiedUser
+    from .models import cache_flag, Flag, VerifiedUser, cache_verified_user
     from .compat import cache
 
-    # review:
-    #flag = cache.get(keyfmt(settings.FLAG_CACHE_KEY, flag_name))
-    flag = None
+    flag = cache.get(keyfmt(settings.FLAG_CACHE_KEY, flag_name))
+
     if flag is None:
         try:
             flag = Flag.objects.get(name=flag_name)
@@ -68,11 +67,22 @@ def flag_is_active(request, flag_name, custom_user='phone_number', msisdn=None, 
     if hasattr(request, custom_user) or msisdn:
         user = getattr(request, custom_user, None) or msisdn
         if user:
-            for beta_user in VerifiedUser.objects.filter(feature_id=flag.id):
-                regex = beta_user.phone_number
+            # Try query for cached value
+            cached_verified_user = cache.get(keyfmt(settings.VERIFIED_USER_CACHE_KEY, user))
+            if cached_verified_user:
+                if cached_verified_user.feature.id == flag.id:
+                    return True
+
+            # Fallback to DB lookup
+            for verified_user in VerifiedUser.objects.filter(feature_id=flag.id):
+                regex = verified_user.phone_number
                 try:
                     match = re.search(regex, user)
                     if match is not None:
+                        # Cache the verified user for future use :)
+                        # Caveat: Since verified_user's phone number is not unique,
+                        # only the current instance can be cached at a time.
+                        cache_verified_user(instance=verified_user)
                         return True
                 except:
                     pass

@@ -292,6 +292,7 @@ class WaffleTests(TestCase):
 
         # test flag with no phone_number in the phone group
         flag, create = Flag.objects.get_or_create(name='feature1')
+
         phone_number = '0702729654'
         VerifiedUser.objects.filter(feature=flag).filter(phone_number=phone_number).delete()
 
@@ -310,14 +311,12 @@ class WaffleTests(TestCase):
         flag.everyone = None
         flag.save()
 
-
         # test flag is active if phone_number is Flag - PhoneGroup
         VerifiedUser.objects.create(feature=Flag.objects.get(name='feature1'),
                                     phone_number=phone_number)
 
         response = process_request(request, views.flag_in_view, 'feature1')
         self.assertEqual(b'on', response.content)
-
 
         verified_phone_number = VerifiedUser.objects.get(phone_number=phone_number)
 
@@ -328,6 +327,47 @@ class WaffleTests(TestCase):
         response = process_request(request, views.flag_in_view)
         self.assertEqual(b'off', response.content)
 
+    def test_verified_user_validation(self):
+        flag_name = "test_caching"
+        phone_number = "0700112233"
+
+        flag, create = Flag.objects.get_or_create(name="test_caching")
+
+        VerifiedUser.objects.create(feature=flag,
+                                    phone_number=phone_number)
+
+        class WaffleRequest:
+            def __init__(self, phone_no):
+                self.phone_number = phone_no
+
+        assert waffle.flag_is_active(WaffleRequest(phone_number), flag_name)
+
+        # Now delete the verified user and confirm flag will not be active for the phone number
+        VerifiedUser.objects.filter(feature=flag).filter(phone_number=phone_number).delete()
+        assert not waffle.flag_is_active(WaffleRequest(phone_number), flag_name)
+
+        # Not even after clearing the verified user cache
+        assert not waffle.flag_is_active(WaffleRequest(phone_number), flag_name)
+
+        # And certainly not for anyone
+        class NormalRequest:
+            def __init__(self):
+                pass
+
+        assert not waffle.flag_is_active(NormalRequest(), flag_name)
+
+        # when we add the verified user again, flag should be active now
+        VerifiedUser.objects.create(feature=flag,
+                                    phone_number=phone_number)
+        assert waffle.flag_is_active(WaffleRequest(phone_number), flag_name)
+
+        # but not for a stranger
+        stranger = "0712345678"
+        flag2, create = Flag.objects.get_or_create(name="another_flag")
+        VerifiedUser.objects.create(feature=flag2,
+                                    phone_number=stranger)
+
+        assert not waffle.flag_is_active(WaffleRequest(stranger), flag_name)
 
 
 class SwitchTests(TestCase):
