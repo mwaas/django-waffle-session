@@ -1,6 +1,5 @@
 from django.contrib import admin
-from import_export.admin import ImportExportModelAdmin
-from resources import VerifiedUserResource
+
 from waffle.models import Flag, Sample, Switch, VerifiedUser
 
 
@@ -29,11 +28,10 @@ class FlagAdmin(admin.ModelAdmin):
     raw_id_fields = ('users', 'groups')
     ordering = ('-id',)
 
-class VerifiedUserAdmin(ImportExportModelAdmin):
+class VerifiedUserAdmin(admin.ModelAdmin):
     list_display = ('phone_number', 'feature')
     list_filter = ('feature', )
     search_fields = ('phone_number', )
-    resource_class = VerifiedUserResource
 
 
 
