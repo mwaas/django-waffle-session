@@ -14,6 +14,7 @@ SAMPLE_CACHE_KEY = getattr(settings, 'WAFFLE_SAMPLE_CACHE_KEY', 'sample:%s')
 SAMPLES_ALL_CACHE_KEY = getattr(settings, 'WAFFLE_SAMPLES_ALL_CACHE_KEY', 'samples:all')
 SWITCH_CACHE_KEY = getattr(settings, 'WAFFLE_SWITCH_CACHE_KEY', 'switch:%s')
 SWITCHES_ALL_CACHE_KEY = getattr(settings, 'WAFFLE_SWITCHES_ALL_CACHE_KEY', 'switches:all')
+VERIFIED_USER_CACHE_KEY = getattr(settings, 'WAFFLE_VERIFIED_USER_CACHE_KEY', 'verifieduser:%s')
 
 
 SWITCH_DEFAULT = getattr(settings, 'WAFFLE_SWITCH_DEFAULT', False)
