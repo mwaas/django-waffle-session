@@ -53,6 +53,9 @@ class Flag(models.Model):
     def __unicode__(self):
         return self.name
 
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
         self.modified = datetime.now()
         super(Flag, self).save(*args, **kwargs)
