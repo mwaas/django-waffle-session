@@ -65,6 +65,9 @@ class VerifiedUser(models.Model):
     feature = models.ForeignKey(Flag)
     phone_number = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.phone_number
+
 
 @python_2_unicode_compatible
 class Switch(models.Model):

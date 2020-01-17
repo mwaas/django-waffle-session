@@ -31,7 +31,7 @@ def set_flag(request, flag_name, active=True, session_only=False):
     request.waffles[flag_name] = [active, session_only]
 
 
-def flag_is_active(request, flag_name, custom_user='phone_number', msisdn=None, **kwargs):
+def flag_is_active(request, flag_name, **kwargs):
     """
     custom_group phone number is an alternate form of validation apart from the user and Group
             it finds the custom_user from the request then check if the phone_number is in the VerifiedUser
@@ -45,6 +45,10 @@ def flag_is_active(request, flag_name, custom_user='phone_number', msisdn=None, 
     """
     from .models import cache_flag, Flag, VerifiedUser, cache_verified_user
     from .compat import cache
+
+    msisdn = kwargs.get("msisdn", None)
+    regex = kwargs.get("regex", None)
+    custom_user = kwargs.get("custom_user", "phone_number")
 
     flag = cache.get(keyfmt(settings.FLAG_CACHE_KEY, flag_name))
 
@@ -64,7 +68,7 @@ def flag_is_active(request, flag_name, custom_user='phone_number', msisdn=None, 
     elif flag.everyone is False:
         return False
 
-    if hasattr(request, custom_user) or msisdn:
+    if hasattr(request, custom_user) or msisdn or regex:
         user = getattr(request, custom_user, None) or msisdn
         if user:
             # Try query for cached value
@@ -75,9 +79,9 @@ def flag_is_active(request, flag_name, custom_user='phone_number', msisdn=None, 
 
             # Fallback to DB lookup
             for verified_user in VerifiedUser.objects.filter(feature_id=flag.id):
-                regex = verified_user.phone_number
+                local_regex = verified_user.phone_number
                 try:
-                    match = re.search(regex, user)
+                    match = re.search(local_regex, user)
                     if match is not None:
                         # Cache the verified user for future use :)
                         # Caveat: Since verified_user's phone number is not unique,
