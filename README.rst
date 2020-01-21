@@ -33,3 +33,19 @@ Waffle comes with a helper shell script to run tests and create schema migration
 
 `$ ./run.sh test`      
 Run the script with no arguments to see all the options.
+
+
+Django Waffle releases are based on Semantic Versioning. Please refer to
+the [Semantic Versioning documentation](http://semver.org/) for
+reference.
+
+- Make code changes on master branch
+- Update setup.py with the new version number
+- `git commit`
+- `git tag -a vMAJOR.MINOR.PATCH -m "my version MAJOR.MINOR.PATCH"`
+- `git push`
+- `git push --tags`
+- `make distribute`
+- Upload the new tar django-waffle-session version from the `dist` directory to
+  gemfury
+- make relevant changes in your code to utilize the updated version.

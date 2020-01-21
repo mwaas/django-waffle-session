@@ -12,6 +12,7 @@ docs/_*
 
 # ignore virtual environment
 .venv
+venv
 
 # ignore pycharm files
 .idea
