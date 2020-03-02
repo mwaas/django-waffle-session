@@ -46,6 +46,5 @@ reference.
 - `git push`
 - `git push --tags`
 - `make distribute`
-- Upload the new tar django-waffle-session version from the `dist` directory to
-  gemfury
+- Upload the new tar django-waffle-session version from the `dist` directory to [Jumo-nexus](https://repository.jumo.world/) under the repository jumo-pypi
 - make relevant changes in your code to utilize the updated version.
