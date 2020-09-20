@@ -62,7 +62,7 @@ class Flag(models.Model):
 
 @python_2_unicode_compatible
 class VerifiedUser(models.Model):
-    feature = models.ForeignKey(Flag)
+    feature = models.ForeignKey(Flag, on_delete=models.PROTECT)
     phone_number = models.CharField(max_length=255)
 
     def __str__(self):
